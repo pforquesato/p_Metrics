@@ -12,8 +12,8 @@ import p_OLS
 
 class p_IV_FS(object):
     '''
-    Implements a series of tests of First Stage significance. If run separately, also can provide
-    First Stage results.
+    Implements a series of tests of First Stage significance. If run separately, 
+    also can provide First Stage results.
     
     __author__ = 'Pedro Forquesato <pedro.forquesato@puc-rio.br>'
     
@@ -36,16 +36,18 @@ class p_IV_FS(object):
                       independent variables. Factors can be marked by adding 
                       'factor:' in front of the variable.
     seMethod        : str
-                      One of possible methods of calculating standard errors. Options are None, which
-                      uses standard simplified formula for SE, 'robust' for White-Huber
-                      heteroskedasticity-robust SE and 'bootstrap' for bootstrap-calculated SE.
-                      Defaults to 'robust', following discussion in Cameron & Triverdi (2005), p.74-75.
+                      One of possible methods of calculating standard errors. Options 
+                      are None, which uses standard simplified formula for SE, 'robust'
+                      for White-Huber heteroskedasticity-robust SE and 'bootstrap' for
+                      bootstrap-calculated SE. Defaults to 'robust', following discussion
+                      in Cameron & Triverdi (2005), p.74-75.
     cluster            : str
-                      Name of the variable that defines the clusters, if those exist. Defaults to None.
-                      If a string is given, then Cluster-robust standard errors are calculated, and any value
-                      given to se_method is ignored, except if given 'bootstrap', when Bootstrap clustered SE
-                      are calculated instead.  Designed for SMALL clusters, such that Variance 
-                      Matrix can be properly estimated.
+                      Name of the variable that defines the clusters, if those exist. 
+                      Defaults to None. If a string is given, then Cluster-robust standard 
+                      errors are calculated, and any value given to se_method is ignored, 
+                      except if given 'bootstrap', when Bootstrap clustered SE are calculated 
+                      instead.  Designed for -small- clusters, such that Variance Matrix can 
+                      be properly estimated.
         
     '''
     def __init__(self, dataFrame, endogenous, instruments, xVariable, seMethod, cluster):
@@ -99,7 +101,8 @@ class p_IV_FS(object):
                     
     def _p_PartialR(self):
         '''
-        Calculates Partial R square according to Bound, Jaeger and Baker (1995) for 1 endogenous variable.
+        Calculates Partial R square according to Bound, Jaeger and Baker (1995) 
+        for 1 endogenous variable.
         '''
         # Here we use Bound, Jaeger and Baker (1995) Partial R Sq. 
         # As seen in CT05, p.104. The idea is to regress
@@ -336,19 +339,21 @@ class p_IV_raw(object):
     yMatrix            : numpy.array (Nx1)
                       A Nx1 matrix with N observations of the dependent variable (y).
     xMatrix            : numpy.array(NxK_x)
-                      A NxK_x matrix with N observations of the K_x independent variables (X),
-                      including endogenous ones.
+                      A NxK_x matrix with N observations of the K_x independent 
+                      variables (X), including endogenous ones.
     zMatrix            : numpy.array(NxK_z)
-                      A NxK_z matrix with N observations of the K_z independent variables (Z),
-                      excluding endogenous variables and including instruments.
+                      A NxK_z matrix with N observations of the K_z independent 
+                      variables (Z), excluding endogenous variables and including 
+                      instruments.
     seMethod        : str
-                      One of possible methods of calculating standard errors. Options are None, which
-                      uses standard simplified formula for SE, 'robust' for White-Huber
-                      heteroskedasticity-robust SE and 'bootstrap' for bootstrap-calculated SE.
-                      Defaults to 'robust', following discussion in Cameron & Triverdi (2005), p.74-75.
+                      One of possible methods of calculating standard errors. Options 
+                      are None, which uses standard simplified formula for SE, 'robust'
+                      for White-Huber heteroskedasticity-robust SE and 'bootstrap' for 
+                      bootstrap-calculated SE. Defaults to 'robust', following discussion 
+                      in Cameron & Triverdi (2005), p.74-75.
     clusterDummies    : DataFrame
-                      A pandas DataFrame with the cluster variable in dummy format, if it exists. 
-                      Defaults to None.
+                      A pandas DataFrame with the cluster variable in dummy format, 
+                      if it exists. Defaults to None.
                      
     '''    
     
@@ -422,20 +427,21 @@ class p_IV_raw(object):
         y                : numpy.array (Nx1)
                           A Nx1 matrix with N observations of the dependent variable (y).
         X                : numpy.array(NxKx)
-                          A NxKx matrix with N observations of the Kx independent (possibly 
-                          endogenous) variables (X).
+                          A NxKx matrix with N observations of the Kx independent
+                          (possibly endogenous) variables (X).
         Z                : numpy.array(NxKz)
                           A NxKz matrix with N observations of the Kz instruments (Z).
         intercept        : bool
                           Whether to add an intercept to regression. Defaults to True.
         seMethod        : str
-                          One of possible methods of calculating standard errors. Options are None, which
-                          uses standard simplified formula for SE, 'robust' for White-Huber
-                          heteroskedasticity-robust SE and 'bootstrap' for bootstrap-calculated SE.
-                          Defaults to 'robust', following discussion in Cameron & Triverdi (2005), p.74-75.
+                          One of possible methods of calculating standard errors. Options 
+                          are None, which uses standard simplified formula for SE, 'robust'
+                          for White-Huber heteroskedasticity-robust SE and 'bootstrap' for 
+                          bootstrap-calculated SE. Defaults to 'robust', following discussion 
+                          in Cameron & Triverdi (2005), p.74-75.
         clusterDummies    : DataFrame
-                          A pandas DataFrame with the cluster variable in dummy format, if it exists. 
-                          Defaults to None.                         
+                          A pandas DataFrame with the cluster variable in dummy format, 
+                          if it exists. Defaults to None.                         
         '''            
         # Is go time! This is the IV estimator, see CT05, p. 98.
         
@@ -479,7 +485,8 @@ class p_IV_raw(object):
                 # elements are zero (and the matrix can get quite big!).    
                 sigma = sparse.diags(uSquare, 0)
                 sigma_ZZ = np.dot(Z.T, sigma.dot(Z))
-                varCoVar = float(self.N)/(self.N - self.Kx) * np.dot(np.dot(ZX_inv, sigma_ZZ), ZX_inv)
+                varCoVar = float(self.N)/(self.N - self.Kx) * \
+                    np.dot(np.dot(ZX_inv, sigma_ZZ), ZX_inv)
         
                 # From the VarCoVar we can get the standard errors
                 # simply picking from the diagonal.
@@ -509,7 +516,8 @@ class p_IV_raw(object):
                 raise NotImplementedError('Sorry!')
             
             else:
-                raise ValueError('Variable seMethod was not given a valid input. Please try: "bootstrap", "robust" or None.')
+                raise ValueError('Variable seMethod was not given a valid input.' 
+                    'Please try: "bootstrap", "robust" or None.')
         
         # Finally, we define p_IV_raw attributes with the important variables.
         # They will be inherited by p_IV class and become our results.
@@ -531,20 +539,21 @@ class p_IV_raw(object):
         y                : numpy.array (Nx1)
                           A Nx1 matrix with N observations of the dependent variable (y).
         X                : numpy.array(NxKx)
-                          A NxKx matrix with N observations of the Kx independent (possibly 
-                          endogenous) variables (X).
+                          A NxKx matrix with N observations of the Kx independent 
+                          (possibly endogenous) variables (X).
         Z                : numpy.array(NxKz)
                           A NxKz matrix with N observations of the Kz instruments (Z).
         intercept        : bool
                           Whether to add an intercept to regression. Defaults to True.
         seMethod        : str
-                          One of possible methods of calculating standard errors. Options are None, which
-                          uses standard simplified formula for SE, 'robust' for White-Huber
-                          heteroskedasticity-robust SE and 'bootstrap' for bootstrap-calculated SE.
-                          Defaults to 'robust', following discussion in Cameron & Triverdi (2005), p.74-75.
+                          One of possible methods of calculating standard errors. Options 
+                          are None, which uses standard simplified formula for SE, 'robust' 
+                          for White-Huber heteroskedasticity-robust SE and 'bootstrap' for 
+                          bootstrap-calculated SE. Defaults to 'robust', following discussion 
+                          in Cameron & Triverdi (2005), p.74-75.
         clusterDummies    : DataFrame
-                          A pandas DataFrame with the cluster variable in dummy format, if it exists. 
-                          Defaults to None.                         
+                          A pandas DataFrame with the cluster variable in dummy format,
+                          if it exists. Defaults to None.                         
         '''            
         # Is go time! This is the TSLS estimator, see CT05, p. 101.
         
@@ -606,7 +615,8 @@ class p_IV_raw(object):
                 zMiddle = np.dot( np.dot(XZ, ZZ_inv), np.dot(sigma_ZZ, np.dot(ZZ_inv, ZX) ))
                 
                 # Finally...
-                varCoVar = float(self.N)/(self.N - self.Kx) * np.dot(np.dot(bigInv, zMiddle), bigInv)
+                varCoVar = float(self.N)/(self.N - self.Kx) * \
+                    np.dot(np.dot(bigInv, zMiddle), bigInv)
         
                 # From the VarCoVar we can get the standard errors
                 # simply picking from the diagonal.
@@ -643,8 +653,9 @@ class p_IV_raw(object):
         
 class p_IV(p_IV_raw, p_IV_FS):
     '''
-    Runs Instrumental Variables Linear Regression approach on chosen variables of a pandas DataFrame.
-    See p_iv_first_stage for first stage results and statistics.
+    Runs Instrumental Variables Linear Regression approach on chosen 
+    variables of a pandas DataFrame.  See p_iv_first_stage for first stage 
+    results and statistics.
     
     __author__ = 'Pedro Forquesato <pedro.forquesato@puc-rio.br>'
     
@@ -654,41 +665,46 @@ class p_IV(p_IV_raw, p_IV_FS):
     ---------
     
     dataFrame        : DataFrame
-                      The Pandas dataframe to which yVariable, xVariable, endogenous and
-                      instruments belong.
+                      The Pandas dataframe to which yVariable, xVariable, 
+                      endogenous and instruments belong.
     yVariable        : str
-                      A string with the name of the variable (column) in df to be used as
-                      the dependent variable. 
+                      A string with the name of the variable (column) in dataFrame
+                      to be used as the dependent variable. 
     xVariable        : list
-                      List of strings with names of variables (columns) in df to be used as
-                      independent variables. Factors have to be marked by adding 
-                      'factor:' in front of the variable.
+                      List of strings with names of variables (columns) in dataFrame
+                      to be used as independent variables. Factors have to be marked
+                      by adding 'factor:' in front of the variable.
     endogenous        : list
-                      List of strings with names of variables (columns) in df considered endogenous
-                      and thus being instrumented by variables in instruments. These variables should
-                      NOT be added to x_variable. Factors can be marked by adding 'factor:' in front 
-                      of the variable.
+                      List of strings with names of variables (columns) in dataFrame
+                      considered endogenous and thus being instrumented by variables 
+                      in instruments. These variables should NOT be added to xVariable. 
+                      Factors can be marked by adding 'factor:' in front of the variable.
     instruments        : list
-                      List of strings with names of variables (columns) in df to be used as
-                      instruments. These should include ONLY variables not already included in x_variable.
-                      Variables in x_variable which are not in endogenous are automatically instrumented by
-                      themselves. Factors can be marked by adding 'factor:' in front of the variable.
+                      List of strings with names of variables (columns) in dataFrame
+                      to be used as instruments. These should include ONLY variables
+                      not already included in xVariable. Variables in xVariable which 
+                      are not in endogenous are automatically instrumented by
+                      themselves. Factors can be marked by adding 'factor:' in front 
+                      of the variable.
     intercept        : bool
                       Whether to add an intercept to regression. Defaults to True.
     seMethod        : str
-                      One of possible methods of calculating standard errors. Options are None, which
-                      uses standard simplified formula for SE, 'robust' for White-Huber
-                      heteroskedasticity-robust SE and 'bootstrap' for bootstrap-calculated SE.
-                      Defaults to 'robust', following discussion in Cameron & Triverdi (2005), p.74-75.
+                      One of possible methods of calculating standard errors. Options 
+                      are None, which uses standard simplified formula for SE, 'robust'
+                      for White-Huber heteroskedasticity-robust SE and 'bootstrap' for 
+                      bootstrap-calculated SE. Defaults to 'robust', following discussion 
+                      in Cameron & Triverdi (2005), p.74-75.
     cluster            : str
-                      Name of the variable that defines the clusters, if those exist. Defaults to None.
-                      If a string is given, then Cluster-robust standard errors are calculated, and any value
-                      given to se_method is ignored, except if given 'bootstrap', when Bootstrap clustered SE
+                      Name of the variable that defines the clusters, if those exist. 
+                      Defaults to None. If a string is given, then Cluster-robust 
+                      standard errors are calculated, and any value given to se_method 
+                      is ignored, except if given 'bootstrap', when Bootstrap clustered SE
                       are calculated instead.  Designed for SMALL clusters, such that Variance 
                       Matrix can be properly estimated.
     firstStage        : bool or None
-                      Boolean denoting whether First Stage statistics should be calculated. Defaults to
-                      True. To change whether the results are shown, change Fstage input in outPrint method.
+                      Boolean denoting whether First Stage statistics should be calculated. 
+                      Defaults to True. To change whether the results are shown, change 
+                      firstStage input in outPrint method.
     autoPrint        : bool
                       Whether should automatically print results. Defaults to True.
                      
@@ -722,8 +738,9 @@ class p_IV(p_IV_raw, p_IV_FS):
         
         # Then we call _p_Dummify function to fix DataFrame
         #  for running p_IV_raw. See method for details.
-        self.dataFrame, self.xVariable, self.endogenous, self.instruments = self._p_Dummify(self.dataFrame, \
-            self.yVariable, self.xVariable, self.endogenous, self.instruments, self.cluster)
+        self.dataFrame, self.xVariable, self.endogenous, self.instruments = \
+            self._p_Dummify(self.dataFrame, self.yVariable, self.xVariable, \
+            self.endogenous, self.instruments, self.cluster)
         
         # Asking endogenous and instruments not to be included in 
         # xVariable simplifies the process of building all lists of
@@ -742,14 +759,16 @@ class p_IV(p_IV_raw, p_IV_FS):
         # If we have clusters, we need to build dummies for it so
         # we can calculate std. errors later.
         if self.cluster is not None:
-            clusterDummies = pd.get_dummies(self.dataFrame[self.cluster], prefix='clstr')
+            clusterDummies = pd.get_dummies(self.dataFrame[self.cluster], \
+                prefix='clstr')
         else:
             clusterDummies = None
         
         # Before actually running the model, we need to check if it is
         # not underidentified, and thus not estimable.
         if self.Kz < self.Kx:
-            raise ValueError('This model is underidentified! There are more endogenous variables than instruments.')
+            raise ValueError('This model is underidentified! There are more'
+                'endogenous variables than instruments.')
         
         # Step 3:
         # p_IV_raw runs on y, X and Z matrixes, so we need to build them,
@@ -779,8 +798,9 @@ class p_IV(p_IV_raw, p_IV_FS):
     
     def _p_Dummify(self, dataFrame, yVariable, xVariable, endogenous, instruments, cluster):
         '''
-        Prepares DataFrame and variable lists for transforming them into matrixes
-        used for IV algebra. Most work involves transforming factor variables into dummies.
+        Prepares DataFrame and variable lists for transforming them into 
+        matrixes used for IV algebra. Most work involves transforming factor 
+        variables into dummies.
         '''
         # Here we fix the DataFrame to be able to run IV.        
         
@@ -789,7 +809,8 @@ class p_IV(p_IV_raw, p_IV_FS):
         # all be mutually exclusive.
         for endog in endogenous:
             if endog in xVariable:
-                raise ValueError('Endogenous variables must be given separately from xVariable!')
+                raise ValueError('Endogenous variables must be given'
+                    'separately from xVariable!')
         for exog in instruments:
             if exog in xVariable:
                 raise ValueError('Instruments cannot be part of xVariable!')
@@ -839,12 +860,14 @@ class p_IV(p_IV_raw, p_IV_FS):
         # Before creating dummies, we remove all NA and 
         # save space by removing not needed variables
         # (also important to keep all numeric).
-        if cluster is not None and cluster not in xVariable and cluster not in zVariable:
+        if cluster is not None and cluster not in xVariable \
+            and cluster not in zVariable:
             # Makes sure we keep the cluster in dataFrame...
-            dataFrame = dataFrame.loc[:, xVariable  + [yVariable] + instruments + \
-                endogenous + [cluster]].dropna()
+            dataFrame = dataFrame.loc[:, xVariable  + [yVariable] + \
+            instruments + endogenous + [cluster]].dropna()
         else:
-            dataFrame = dataFrame.loc[:, xVariable + [yVariable] + instruments + endogenous].dropna()
+            dataFrame = dataFrame.loc[:, xVariable + [yVariable] + \
+                instruments + endogenous].dropna()
         
         # Step 3:
         # Now we create the dummies to substitute for the factor.
@@ -892,19 +915,22 @@ class p_IV(p_IV_raw, p_IV_FS):
         
     def outPrint(self, printOpt='table', output=None, firstStage = None):
         '''
-        Prints the OLS parameters and statistics to either terminal or file (available in latex).
+        Prints the OLS parameters and statistics to either terminal or 
+        file (available in latex).
         
         Arguments
         ---------            
         printOpt            : str
-                              How should output be returned. Defaults to 'table', with 
-                              results printed as a table. Other option is 'latex' for latex formatting.
+                              How should output be returned. Defaults to 
+                              'table', with results printed as a table. Other option 
+                              is 'latex' for latex formatting.
         output                : str
-                              The name of the file where the output should be printed. Defaults to
-                              None, which means output is printed in console.
+                              The name of the file where the output should be printed. 
+                              Defaults to None, which means output is printed in console.
         firstStage            : bool or None
-                              Boolean denoting whether First Stage statistics should be shown. Defaults to
-                              None, using the p_IV initialized value self.firstStage.
+                              Boolean denoting whether First Stage statistics should 
+                              be shown. Defaults to None, using the p_IV initialized 
+                              value self.firstStage.
         '''
         # This function prints the IV results in a table format.
         
@@ -918,7 +944,8 @@ class p_IV(p_IV_raw, p_IV_FS):
         headers = ['Variable', 'Coefficient', 'Std. Errors', 'T Value', 'P Value']
         table = list()
         for i, var in enumerate(self.augXVariable):
-            table.append([var, self.beta[i, 0], self.stdError[i, 0], self.tValue[i, 0], self.pValue[i, 0]])
+            table.append([var, self.beta[i, 0], self.stdError[i, 0], \
+                self.tValue[i, 0], self.pValue[i, 0]])
         
         # Prepare for printing the method we used to calculate std. errors.
         if self.cluster is not None:
@@ -936,9 +963,10 @@ class p_IV(p_IV_raw, p_IV_FS):
         
         # Step 2:
         # Above the table we print general statistics of the model (N, R^2, etc.)
-        info = [['Dep. Variable:', self.yVariable], ['Model:', 'Instrumental Variables'], ['Standard Errors:', tpSE], \
-                ['No. Observations:', str(self.N)], ['No. Variables:', str(self.Kx)],
-                ['R Square:', '%.3f' % self.rSquare], ['Adj. R Square', '%.3f' % self.adjRSquare]]
+        info = [['Dep. Variable:', self.yVariable], ['Model:', 'Instrumental Variables'], 
+                ['Standard Errors:', tpSE], ['No. Observations:', str(self.N)], 
+                ['No. Variables:', str(self.Kx)], ['R Square:', '%.3f' % self.rSquare], 
+                ['Adj. R Square', '%.3f' % self.adjRSquare]]
         
         # Step 3:
         # Now we prepare a table for each endogenous variable with
@@ -950,32 +978,40 @@ class p_IV(p_IV_raw, p_IV_FS):
                 firstStageOut.append([['Endogenous Variable:', self.endogenous[i]],
                             ['First Stage:', ', '.join(self.instruments)], 
                             ['Partial R Square:', '%.3f' % self.fs_partialRSquare[i]],
-                            ['Coefficient:', ', '.join(['%.3f' % self.fs_beta[i][k, 0] for k in range(len(self.instruments))])], 
-                            ['T Value:', ', '.join(['%.1f' % self.fs_tValue[i][k, 0] for k in range(len(self.instruments))])],
-                            ['P Value:', ', '.join(['%.3f' % self.fs_pValue[i][k, 0] for k in range(len(self.instruments))])],
+                            ['Coefficient:', ', '.join(['%.3f' % self.fs_beta[i][k, 0] \
+                                for k in range(len(self.instruments))])], 
+                            ['T Value:', ', '.join(['%.1f' % self.fs_tValue[i][k, 0] \
+                                for k in range(len(self.instruments))])],
+                            ['P Value:', ', '.join(['%.3f' % self.fs_pValue[i][k, 0] \
+                                for k in range(len(self.instruments))])],
                             ['F Test:', '%.1f' % self.fs_fTest[i]], 
                             ['F Test P-value:', '%.3f' % self.fs_fTestValue[i]]])
         
         # Step 4: Print out the output.
         if printOpt not in ['table', 'latex']:
             # First we check for wrong printOpt input.        
-            raise ValueError('Variable printOpt was not given an acceptable string. Try: "table" or "latex".')
+            raise ValueError('Variable printOpt was not given an acceptable string.'
+                'Try: "table" or "latex".')
         else:
             # Otherwise:
             if output is None:
                 if printOpt is 'table':
                     if firstStage and self.firstStage:
                         for i in range(len(self.endogenous)):
-                            print tabulate(firstStageOut[i], floatfmt='.4f', tablefmt='rst')
+                            print tabulate(firstStageOut[i], floatfmt='.4f', \
+                                tablefmt='rst')
                     print tabulate(info, floatfmt='.4f', tablefmt='rst')
-                    print tabulate(table, headers=headers, floatfmt=".4f", tablefmt='rst')
+                    print tabulate(table, headers=headers, floatfmt=".4f", \
+                        tablefmt='rst')
             
                 elif print_opt is 'to_latex':
                     if firstStage and self.firstStage:
                         for i in range(len(self.endogenous)):
-                            print tabulate(firstStageOut[i], floatfmt='.4f', tablefmt='latex')
+                            print tabulate(firstStageOut[i], floatfmt='.4f', \
+                                tablefmt='latex')
                     print tabulate(info, floatfmt='.4f', tablefmt='latex')
-                    print tabulate(table, headers=headers, tablefmt="latex", floatfmt=".4f")
+                    print tabulate(table, headers=headers, tablefmt="latex", \
+                        floatfmt=".4f")
                     
             else:
                 # If output is not None, we print to a file. First we open it...
@@ -985,16 +1021,20 @@ class p_IV(p_IV_raw, p_IV_FS):
                 if printOpt is 'table':
                     if firstStage and self.firstStage:
                         for i in range(len(self.endogenous)):
-                            print >> f, tabulate(firstStageOut[i], floatfmt='.4f', tablefmt='rst')
+                            print >> f, tabulate(firstStageOut[i], floatfmt='.4f', \
+                                tablefmt='rst')
                     print >> f, tabulate(info, floatfmt='.4f', tablefmt='rst')
-                    print >> f, tabulate(table, headers=headers, floatfmt=".4f", tablefmt='rst')
+                    print >> f, tabulate(table, headers=headers, floatfmt=".4f", \
+                        tablefmt='rst')
             
                 elif printOpt is 'latex':
                     if Fstage and self.FirstStage:
                         for i in range(len(self.endogenous)):
-                            print >> f, tabulate(firstStageOut[i], floatfmt='.4f', tablefmt='latex')
+                            print >> f, tabulate(firstStageOut[i], floatfmt='.4f', \
+                                tablefmt='latex')
                     print >> f, tabulate(info, floatfmt='.4f', tablefmt='latex')    
-                    print >> f, tabulate(table, headers=headers, tablefmt="latex", floatfmt=".4f")
+                    print >> f, tabulate(table, headers=headers, tablefmt="latex", \
+                        floatfmt=".4f")
                 
                 # ... then we close it.        
                 f.close()    
@@ -1003,17 +1043,4 @@ class p_IV(p_IV_raw, p_IV_FS):
 
 if __name__ == '__main__':
     
-    # paths
-    folder_path = '/home/pedro/Dropbox/doutorado/4o ano/2014 research/networks/'
-    df_path = folder_path + 'prepdata/data/MN/final/'
-
-    # read csv file
-    df = pd.read_csv(df_path + 'dfMN.csv', low_memory=False)
-    
-    yv = 'dem_votes'
-    xv = ['factor:YEAR', 'COUNTY']
-    end = ['nbx_rich', 'x_rich']
-    inst = ['nbx_poorcl', 'x_poorcl']
-
-    test = p_IV(df, yv, xv, end, inst) #, cluster='VTD') #, se_method='bootstrap')
-    #test.outPrint()    
+    # Put a test data here.   
