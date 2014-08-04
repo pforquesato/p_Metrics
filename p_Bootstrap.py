@@ -1,12 +1,9 @@
-import pandas as pd
 import numpy as np
-import time
 from scipy.stats import t
 from random import randint
-from tabulate import tabulate
 import scipy.sparse as sparse
 
-def p_Bootstrap(W, rep_number=200, statistic='se', b_cluster=None, method='nonparametric'):
+def p_Bootstrap(W, repNumber=200, statistic='se', bCluster=None, method='nonparametric'):
 	'''
 	Implements Bootsrap method on data, obtaining the target statistic.
 	
@@ -17,20 +14,23 @@ def p_Bootstrap(W, rep_number=200, statistic='se', b_cluster=None, method='nonpa
 		Arguments
 	---------
 	
-	W				: np.array
-					  A two-dimensional array W with the data to be sampled. 
-	rep_number		: int
-					  The number of replications of data sampling performed by the bootstrapping
-					  procedure. Defaults to 200, following Efron and Tibsharani (1993), p. 52.
-	statistic		: str
-					  A string with the statistic to be bootstrapped. Defaults to Std. Errors 'se', 
-					  and so far only implemented statistic.
-	cluster			: bool
-					  Whether to calculate Cluster-robust Bootstrapped Standard Errors. Default to False. 
-	method			: str
-					  One of possible methods of performing bootstrap. Defaults to 'nonparametric', other 
-					  possibilities are 'parametric' and 'residual'. For more information, 
-					  see Cameron & Triverdi (2005), p.360-361.
+	W		: np.array
+			  A two-dimensional array W with the data to be sampled. 
+	rep_number	: int
+			  The number of replications of data sampling performed by the 
+			  bootstrapping procedure. Defaults to 200, following Efron 
+			  and Tibsharani (1993), p. 52.
+	statistic	: str
+			  A string with the statistic to be bootstrapped. Defaults to 
+			  Std. Errors 'se', and so far only implemented statistic.
+	cluster		: bool
+			  Whether to calculate Cluster-robust Bootstrapped Standard 
+			  Errors. Default to False. 
+	method		: str
+			  One of possible methods of performing bootstrap. Defaults 
+			  to 'nonparametric', other possibilities are 'parametric' 
+			  and 'residual'. For more information, see Cameron & 
+			  Triverdi (2005), p.360-361.
 	'''
 	# List where the bootstrapped repetitions will be sent
 	boot_list = list()
@@ -41,11 +41,10 @@ def p_Bootstrap(W, rep_number=200, statistic='se', b_cluster=None, method='nonpa
 	
 	if b_cluster is not None:
 		# Transform factor into dummies
-		clusters = b_cluster
-		number_clusters = len(clusters.columns)
+		numberClusters = len(bCluster.columns)
 						
 		# Check if cluster has one class
-		if number_clusters == 1:
+		if numberClusters == 1:
 			raise Exception('This factor has only one unique value!')
 	
 		n_sampling = N / number_clusters
@@ -55,7 +54,7 @@ def p_Bootstrap(W, rep_number=200, statistic='se', b_cluster=None, method='nonpa
 		# See Cameron & Triverdi (2005), p.360 for the bootstrap algorithm
 				
 		# Calculate the target statistic
-		if statistic == 'se' and method == 'nonparametric':
+		if statistic is 'se' and method is 'nonparametric':
 			if b_cluster is None:
 				# Gets indexes of a sample with replacement
 				sample_indx = [randint(0, N - 1) for i in xrange(N)]
