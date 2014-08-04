@@ -571,15 +571,4 @@ class p_OLS(p_OLS_raw):
 
 if __name__ == '__main__':
 	
-	# paths
-	folder_path = '/home/pedro/Dropbox/doutorado/4o ano/2014 research/networks/'
-	df_path = folder_path + 'prepdata/data/MN/final/'
-
-	# read csv file
-	df = pd.read_csv(df_path + 'dfMN.csv', low_memory=False)
-	
-	yv = 'dem_votes'
-	xv = ['x_rich', 'x_poorcl', 'factor:YEAR'] # , 'factor:YEAR*x_rich'
-
-	test = p_OLS(df, yv, xv) #, cluster='VTD') #, se_method='bootstrap')
-	#test.outPrint()		
+	# Add test data here.		
