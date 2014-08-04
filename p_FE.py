@@ -11,7 +11,8 @@ import p_OLS
 
 class p_FE(p_OLS.p_OLS):
 	'''
-	Implements linear regression models (FE and IVFE) on chosen variables of a pandas DataFrame or Panel.
+	Implements linear regression models (FE and IVFE) on chosen variables of a 
+	pandas DataFrame or Panel.
 	
 	__author__ = 'Pedro Forquesato <pedro.forquesato@puc-rio.br>'
 	
@@ -20,44 +21,51 @@ class p_FE(p_OLS.p_OLS):
 	Arguments
 	---------
 	
-	dataFrame		: DataFrame
-					  The Pandas DataFrame to which y_variable and x_variable belongs.
-	yVariable		: str
-					  A string with the name of the variable (column) in df to be used as
-					  the dependent variable. 
-	xVariable		: list
-					  List of strings with names of variables (columns) in df to be used as
-					  independent variables. Factors have to be marked by adding 
-					  'factor:' in front of the variable.
-	effect			: str
-					  String denoting Panel method to be applied. Defaults to "within", but can also be used
-					  "first differences", "random" for Random Effects and 'ols' for Pooled OLS.
-	indexes			: tuple (str)
-					  Name of variables denoting individual (0) and time (1) indexes (MIND THE ORDER). 
-					  If providing a pandas Panel with individual-time multi-indexing, use None (also Default). 
-	endogenous		: list
-					  List of strings with names of variables (columns) in df considered endogenous
-					  and thus being instrumented by variables in instruments. These variables should
-					  NOT be added to x_variable. Defaults to None.
-	instruments		: list
-					  List of strings with names of variables (columns) in df to be used as
-					  instruments. These should include ONLY variables not already included in x_variable.
-					  Variables in x_variable which are not in endogenous are automatically instrumented by
-					  themselves. Defaults to None.
-	intercept		: bool
-					  Whether to add an intercept to regression. Defaults to True.
-	seMethod		: str
-					  One of possible methods of calculating standard errors. Options are None, which
-					  uses standard simplified formula for SE, 'robust' for White-Huber
-					  heteroskedasticity-robust SE and 'bootstrap' for bootstrap-calculated SE.
-					  Defaults to 'robust', following discussion in Cameron & Triverdi (2005), p.74-75.
-					 
+	dataFrame	: DataFrame
+			  The Pandas DataFrame to which yVariable and xVariable 
+			  belongs.
+	yVariable	: str
+			  A string with the name of the variable (column) in dataFrame
+			  to be used as the dependent variable. 
+	xVariable	: list
+			  List of strings with names of variables (columns) in dataFrame
+			  to be used as independent variables. Factors have to be marked 
+			  by adding 'factor:' in front of the variable.
+	effect		: str
+			  String denoting Panel method to be applied. Defaults to "within",
+			  but can also be used "first differences", "random" for Random 
+			  Effects and 'ols' for Pooled OLS.
+	indexes		: tuple (str)
+			  Name of variables denoting individual (0) and time (1) indexes 
+			  (MIND THE ORDER). If providing a pandas Panel with individual-time 
+			  multi-indexing, use None (also Default). 
+	endogenous	: list
+			  List of strings with names of variables (columns) in dataFrame
+			  considered endogenous and thus being instrumented by variables 
+			  in instruments. These variables should NOT be added to xVariable. 
+			  Defaults to None.
+	instruments	: list
+			  List of strings with names of variables (columns) in df to be 
+			  used as instruments. These should include ONLY variables not already 
+			  included in xVariable. Variables in xVariable which are not in 
+			  endogenous are automatically instrumented by themselves. 
+			  Defaults to None.
+	intercept	: bool
+			  Whether to add an intercept to regression. Defaults to True.
+	seMethod	: str
+			  One of possible methods of calculating standard errors. Options 
+			  are None, which uses standard simplified formula for SE, 'robust' 
+			  for White-Huber heteroskedasticity-robust SE and 'bootstrap' for 
+			  bootstrap-calculated SE. Defaults to 'robust', following discussion 
+			  in Cameron & Triverdi (2005), p.74-75.
+				 
 	'''			
-	def __init__(self, dataFrame, yVariable, xVariable, indexes, effect='within', endogenous=None, instruments=None, \
-				intercept=False, seMethod='robust', autoPrint=True):
+	def __init__(self, dataFrame, yVariable, xVariable, indexes, \
+		effect='within', endogenous=None, instruments=None, \
+		intercept=False, seMethod='robust', autoPrint=True):
 		'''
-		Changes variables in pandas Panel according to effects (that is, 'within', 'between', 'random' or 'ols'), 
-		and then call inheriting object p_OLS.
+		Changes variables in pandas Panel according to effects (that is, 'within', 
+		'between', 'random' or 'ols'), and then call inheriting object p_OLS.
 		'''
 		# So the plan here is to do the necessary transformations in data (e.g. within), 
 		# and then call p_OLS (i.e. run OLS), with the appropriate individual clusters
@@ -88,7 +96,8 @@ class p_FE(p_OLS.p_OLS):
 			self.dataFrame = dataFrame.set_index(self.indexes)
 		else:
 			self.dataFrame = pd.DataFrame(dataFrame)
-			self.indexes = [self.dataFrame.index.names[0], self.dataFrame.index.names[1]]
+			self.indexes = [self.dataFrame.index.names[0], \
+				self.dataFrame.index.names[1]]
 		
 		# Call _p_DummifyFE method to fix the DataFrame for
 		# running OLS. See the method for details.
@@ -118,7 +127,8 @@ class p_FE(p_OLS.p_OLS):
 			# periods.
 			self.dataFrame = self.dataFrame.diff()
 			self.dataFrame.reset_index(inplace=True) # Reset Index
-			self.dataFrame.loc[ self.dataFrame[self.indexes[0]] != self.dataFrame[self.indexes[0]].shift( 1 ) ] = np.nan
+			self.dataFrame.loc[ self.dataFrame[self.indexes[0]] != \
+				self.dataFrame[self.indexes[0]].shift( 1 ) ] = np.nan
 		
 		elif self.effect is 'random':
 			# Random Effects are not yet implemented.
@@ -130,7 +140,8 @@ class p_FE(p_OLS.p_OLS):
 			self.dataFrame.reset_index(inplace=True)
 			
 		else:
-			raise ValueError('Variable effect was not given a valid value. Try "within", "first differences" or "random".')
+			raise ValueError('Variable effect was not given a valid value.' 
+				'Try "within", "first differences" or "random".')
 
 		# Now we obtain No. observations, periods and variables.
 		# We must be careful not to override p_OLS variables.
@@ -143,8 +154,9 @@ class p_FE(p_OLS.p_OLS):
 		# on the individual to control for temporal error correlation.
 		# See CT05, p.707.
 		if self.endogenous is None:
-			p_OLS.p_OLS.__init__(self, self.dataFrame, self.yVariable, self.xVariable, seMethod=self.seMethod, \
-							cluster=self.indexes[0], autoPrint=False)
+			p_OLS.p_OLS.__init__(self, self.dataFrame, self.yVariable, \
+				self.xVariable, seMethod=self.seMethod, \
+				cluster=self.indexes[0], autoPrint=False)
 		else:
 			raise NotImplementedError('Sorry!')
 		
@@ -152,9 +164,10 @@ class p_FE(p_OLS.p_OLS):
 		# For within FE, we need to adjust the std. errors, T and P values
 		# for the loss of degrees of freedom (CT05, p.727).
 		if effect is 'within':
-			self.stdError = np.sqrt((self.NF * self.TF - self.KF)/float(self.NF * (self.TF - 1) - self.KF)) * self.stdError
+			self.stdError = np.sqrt((self.NF * self.TF - self.KF) / \
+				float(self.NF * (self.TF - 1) - self.KF)) * self.stdError
 			self.tValue = np.divide(self.beta, self.stdError)
-			self.pValue = t.sf(np.abs(self.tValue), self.NF - self.KF) * 2 # two-sided
+			self.pValue = t.sf(np.abs(self.tValue), self.NF - self.KF) * 2
 		
 		# autoPrint does what its name says.	
 		if autoPrint:
@@ -163,26 +176,30 @@ class p_FE(p_OLS.p_OLS):
 			
 	def outPrint(self, printOpt='table', output=None):
 		'''
-		Prints the FE parameters and statistics to either terminal or file (available in latex).
+		Prints the FE parameters and statistics to either terminal or 
+		file (available in latex).
 		
 		Arguments
 		---------			
-		printOpt			: str
-							  How should output be returned. Defaults to 'table', with 
-							  results printed as a table. Other option is 'latex' for latex formatting.
-		output				: str
-							  The name of the file where the output should be printed. Defaults to
-							  None, which means output is printed in console.
+		printOpt	: str
+				  How should output be returned. Defaults to 'table', 
+				  with results printed as a table. Other option is 
+				  'latex' for latex formatting.
+		output		: str
+				  The name of the file where the output should be printed. 
+				  Defaults to None, which means output is printed in console.
 		'''
 		# This function prints the OLS/FE results in a table format.
 		
 		# Step 1:
-		# First we prepare the Header and the table with the results in a format
-		# that the package tabulate can accept.
-		headers = ['Variable', 'Coefficient', 'Std. Errors', 'T Value', 'P Value']
+		# First we prepare the Header and the table with the results 
+		# in a format that the package tabulate can accept.
+		headers = ['Variable', 'Coefficient', 'Std. Errors', \
+			'T Value', 'P Value']
 		table = list()
 		for i, var in enumerate(self.xVariable):
-			table.append([var, self.beta[i, 0], self.stdError[i, 0], self.tValue[i, 0], self.pValue[i, 0]])
+			table.append([var, self.beta[i, 0], self.stdError[i, 0], \
+				self.tValue[i, 0], self.pValue[i, 0]])
 		
 		# Prepare for printing the method we used to calculate std. errors.
 		if self.seMethod is 'robust':
@@ -192,7 +209,8 @@ class p_FE(p_OLS.p_OLS):
 		elif self.seMethod is None or self.seMethod is 'None':
 			tpSE = 'Panel Adjusted Homoskedastic Restricted'
 		else:
-			raise ValueError('Variable seMethod did not receive an acceptable value. Try "bootstrap", "robust" or None.')
+			raise ValueError('Variable seMethod did not receive an '
+				'acceptable value. Try "bootstrap", "robust" or None.')
 		
 		# Now we prepare the method ('effect') used to calculate the Panel model. 
 		if self.effect is 'ols':
@@ -203,24 +221,28 @@ class p_FE(p_OLS.p_OLS):
 		# Step 2:
 		# Above the table we print general statistics of the model (N, R^2, etc.)
 		info = [['Dep. Variable:', self.yVariable], ['Model:', tpEffect], 
-				['Standard Errors:', tpSE],  ['No. Individuals:', str(self.NF)], 
-				['No. Periods:', str(self.TF)], ['Total No. Observations:', str(self.N)], ['No. Variables:', str(self.KF)],
-				['R Squared:', '%.3f' % self.rSquare], ['Adj. R Squared', '%.3f' % self.adjRSquare]]		
+			['Standard Errors:', tpSE],  ['No. Individuals:', str(self.NF)], 
+			['No. Periods:', str(self.TF)], ['Total No. Observations:', str(self.N)], 
+			['No. Variables:', str(self.KF)], ['R Squared:', '%.3f' % self.rSquare], 
+			['Adj. R Squared', '%.3f' % self.adjRSquare]]		
 		
 		# Step 3: Print out the output.
 		if printOpt not in ['table', 'latex']:
 			# First we check for wrong printOpt input.	
-			raise ValueError('Variable print_opt was not given an acceptable string. Try "print" or "to_latex".')
+			raise ValueError('Variable print_opt was not given an '
+				'acceptable string. Try "print" or "to_latex".')
 		else:
 			# Otherwise:
 			if output is None:
 				if printOpt is 'table':
 					print tabulate(info, floatfmt='.4f', tablefmt='rst')
-					print tabulate(table, headers=headers, floatfmt=".4f", tablefmt='rst')
+					print tabulate(table, headers=headers, \
+						floatfmt=".4f", tablefmt='rst')
 			
 				else:
 					print tabulate(info, floatfmt='.4f', tablefmt='latex')
-					print tabulate(table, headers=headers, tablefmt="latex", floatfmt=".4f")
+					print tabulate(table, headers=headers, \
+						tablefmt="latex", floatfmt=".4f")
 					
 			else:
 				# If output is not None, we print to a file. First we open it...
@@ -229,11 +251,13 @@ class p_FE(p_OLS.p_OLS):
 				# ... then we print...
 				if printOpt is 'table':
 					print >> f, tabulate(info, floatfmt='.4f', tablefmt='rst')
-					print >> f, tabulate(table, headers=headers, floatfmt=".4f", tablefmt='rst')
+					print >> f, tabulate(table, headers=headers, \
+						floatfmt=".4f", tablefmt='rst')
 			
 				else:
 					print >> f, tabulate(info, floatfmt='.4f', tablefmt='latex')	
-					print >> f, tabulate(table, headers=headers, tablefmt="latex", floatfmt=".4f")
+					print >> f, tabulate(table, headers=headers, \
+						tablefmt="latex", floatfmt=".4f")
 				
 				# ... then we close it.	
 				f.close()	
@@ -241,8 +265,9 @@ class p_FE(p_OLS.p_OLS):
 
 	def _p_DummifyFE(self, dataFrame, xVariable, yVariable):
 		'''
-		Prepares DataFrame and variable lists for transforming them into matrixes
-		used for FE/OLS algebra. Most work involves transforming factor variables into dummies.
+		Prepares DataFrame and variable lists for transforming them 
+		into matrixes used for FE/OLS algebra. Most work involves
+		transforming factor variables into dummies.
 		'''
 		# Here we fix the DataFrame to be able to run OLS.
 		
@@ -251,7 +276,8 @@ class p_FE(p_OLS.p_OLS):
 		# pandas object. To do so, we simply put 'factor:' in front ourselves.
 		for varIndex, varName in enumerate(xVariable):
 			if varName in dataFrame.columns:
-				if dataFrame[varName].dtype == 'O' and not varName.startswith('factor:'):
+				if dataFrame[varName].dtype == 'O' and not \
+					varName.startswith('factor:'):
 					xVariable[varIndex] = 'factor:' + varName
 		
 		# Dealing with factors is tricky. We create a list of dummies
@@ -302,15 +328,4 @@ class p_FE(p_OLS.p_OLS):
 if __name__ == '__main__':
 	
 
-	folder_path = '/home/pedro/Dropbox/doutorado/4o ano/2014 research/networks/'
-	df_path = folder_path + 'prepdata/data/MN/final/'
-	df = pd.read_csv(df_path + 'dfMN.csv', low_memory=False) #, index_col=(0, 2))
-	yv = 'dem_votes'
-	xv = ['x_rich', 'x_poorcl'] #, 'factor:YEAR']#, 'COUNTY']
-	indexes = ['VTD', 'YEAR']
-	test = p_FE(df, yv, xv, indexes=indexes, effect='within') #, effect='first differences')
-	#intercept=True
-	#seMethod='robust'
-	#cluster=None
-	#printOpt='print'
-	#output=None
+	# Add some test data here.
