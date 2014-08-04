@@ -1,0 +1,37 @@
+CHANGE _p_Dummify TO CHANGE THE ATTRIBUTES DIRECTLY.
+
+OLS:
+- Regression: working.
+- Non-robust SE: working.
+- Robust SE: working.
+- Cluster SE: working.
+- Bootstrap SE: working.
+- Bootstrap-cluster SE: NOT WORKING.
+- OOP: check!
+FIX INTERACTIONS!!
+
+IV:
+- Regression: working.
+- 1st stage stats: working.
+- Non-robust SE: working.
+- Robust SE: working.
+- Cluster SE: NOT IMPLEMENTED.
+- Bootstrap SE: NOT IMPLEMENTED.
+- Bootstrap-cluster SE: NOT IMPLEMENTED.
+- OOP: check!
+SE GIVING NAN!!!
+
+FE:
+TO BE IMPLEMENTED.
+What I want:
+- Within estimator: working
+- Between estimator : OUT
+- First differences: working 
+- Robust SE: working
+- Cluster SE: OUT
+- Bootstrap SE: ?
+- Bootstrap-cluster SE: OUT
+- Random Effects: NOT IMPLEMENTED
+- OOP: check!
+
+Basically what I need to is to apply the data transformations and call p_OLS
