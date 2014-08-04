@@ -19,18 +19,19 @@ class p_OLS_raw(object):
 	Arguments
 	---------
 	
-	yMatrix			: numpy.array (Nx1)
-					  A Nx1 matrix with N observations of the dependent variable (y).
-	xMatrix			: numpy.array(NxK)
-					  A NxK matrix with N observations of the K independent variables (X).
-	seMethod		: str
-					  One of possible methods of calculating standard errors. Options are None, which
-					  uses standard simplified formula for SE, 'robust' for White-Huber
-					  heteroskedasticity-robust SE and 'bootstrap' for bootstrap-calculated SE.
-					  Defaults to 'robust', following discussion in Cameron & Triverdi (2005), p.74-75.
+	yMatrix		: numpy.array (Nx1)
+			  A Nx1 matrix with N observations of the dependent variable (y).
+	xMatrix		: numpy.array(NxK)
+			  A NxK matrix with N observations of the K independent variables (X).
+	seMethod	: str
+			  One of possible methods of calculating standard errors. Options are 
+			  None, which uses standard simplified formula for SE, 'robust' for 
+			  White-Huber heteroskedasticity-robust SE and 'bootstrap' for 
+			  bootstrap-calculated SE. Defaults to 'robust', following discussion 
+			  in Cameron & Triverdi (2005), p.74-75.
 	clusterDummies	: DataFrame
-					  A pandas DataFrame with the cluster variable in dummy format, if it exists. 
-					  Defaults to None.
+			  A pandas DataFrame with the cluster variable in dummy format, if 
+			  it exists. Defaults to None.
 					 
 	'''	
 	
@@ -77,12 +78,14 @@ class p_OLS_raw(object):
 		
 		# Finally, the Adj. R Square adjusts it by the number of 
 		# independent variables.
-		self.adjRSquare = 1 - (1 - self.rSquare) * (float(self.N - 1)/(self.N - self.K - 1))
+		self.adjRSquare = 1 - (1 - self.rSquare) * (float(self.N - 1) \
+		        /(self.N - self.K - 1))
 
 		
 	def _p_OlsRun(self, y, X, seMethod, clusterDummies):
 		'''
-		Runs Ordinary Least Squares linear regression on chosen variables of a pandas DataFrame.
+		Runs Ordinary Least Squares linear regression on chosen variables 
+		of a pandas DataFrame.
 		
 		__author__ = 'Pedro Forquesato <pedro.forquesato@puc-rio.br>'
 		
@@ -91,20 +94,24 @@ class p_OLS_raw(object):
 		Arguments
 		---------
 		
-		y				: numpy.array (Nx1)
-						  A Nx1 matrix with N observations of the dependent variable (y).
-		X				: numpy.array(NxK)
-						  A NxK matrix with N observations of the K independent variables (X).
-		intercept		: bool
-						  Whether to add an intercept to regression. Defaults to True.
-		seMethod		: str
-						  One of possible methods of calculating standard errors. Options are None, which
-						  uses standard simplified formula for SE, 'robust' for White-Huber
-						  heteroskedasticity-robust SE and 'bootstrap' for bootstrap-calculated SE.
-						  Defaults to 'robust', following discussion in Cameron & Triverdi (2005), p.74-75.
+		y		: numpy.array (Nx1)
+				  A Nx1 matrix with N observations of the dependent 
+				  variable (y).
+		X		: numpy.array(NxK)
+				  A NxK matrix with N observations of the K independent 
+				  variables (X).
+		intercept	: bool
+				  Whether to add an intercept to regression. Defaults to True.
+		seMethod	: str
+				  One of possible methods of calculating standard errors. Options 
+				  are None, which uses standard simplified formula for SE, 
+				  'robust' for White-Huber heteroskedasticity-robust SE 
+				  and 'bootstrap' for bootstrap-calculated SE. Defaults 
+				  to 'robust', following discussion in 
+				  Cameron & Triverdi (2005), p.74-75.
 		clusterDummies	: DataFrame
-						  A pandas DataFrame with the cluster variable in dummy format, if it exists. 
-						  Defaults to None.						 
+				  A pandas DataFrame with the cluster variable in dummy 
+				  format, if it exists. Defaults to None.						 
 		'''			
 		# Here is where the magic happens (or the sausage making,
 		#  depending on point of view).
@@ -163,7 +170,8 @@ class p_OLS_raw(object):
 				
 				# And then we multiply them, for each cluster.
 				XX_c[i] = np.dot(X_c[i].T, X_c[i])
-				XuuX_c[i] = np.dot( np.dot(X_c[i].T, u_c[i]), np.dot(u_c[i].T, X_c[i]))
+				XuuX_c[i] = np.dot( np.dot(X_c[i].T, u_c[i]), \
+				        np.dot(u_c[i].T, X_c[i]))
 			
 			# We sum each list of matrixes along the clusters
 			XuuX_c = np.sum(XuuX_c, axis=0)
@@ -172,8 +180,9 @@ class p_OLS_raw(object):
 			XX_c_inv = np.linalg.inv(np.sum(XX_c, axis=0))
 			
 			# And finally we get the VarCoVar matrix.
-			varCoVar = float(self.N - 1)/(self.N - self.K) * float(numberClusters)/(numberClusters - 1) * \
-						np.dot(XX_c_inv, np.dot(XuuX_c, XX_c_inv)) 
+			varCoVar = float(self.N - 1)/(self.N - self.K) * \
+			        float(numberClusters)/(numberClusters - 1) * \
+				np.dot(XX_c_inv, np.dot(XuuX_c, XX_c_inv)) 
 			
 			# From the VarCoVar we can get the standard errors
 			# simply picking from the diagonal.
@@ -211,7 +220,8 @@ class p_OLS_raw(object):
 			# elements are zero (and the matrix can get quite big!).
 			sigma = sparse.diags(uSquare, 0)
 			sigma_XX = np.dot(X.T, sigma.dot(X))
-			varCoVar = float(self.N)/(self.N - self.K) * np.dot(np.dot(XX_inv, sigma_XX), XX_inv)
+			varCoVar = float(self.N)/(self.N - self.K) * \
+			        np.dot(np.dot(XX_inv, sigma_XX), XX_inv)
 			
 			# From the VarCoVar we can get the standard errors
 			# simply picking from the diagonal.
@@ -232,7 +242,8 @@ class p_OLS_raw(object):
 			stdError.shape = (self.K, 1)
 		
 		else:
-			raise ValueError('Variable seMethod was not given an acceptable string. Try: None, "bootstrap" or "robust".')
+			raise ValueError('Variable seMethod was not given an acceptable string.'
+			        'Try: None, "bootstrap" or "robust".')
 		
 		# Finally, we define p_OLS_raw attributes with the important variables.
 		# They will be inherited by p_OLS class and become our results.
@@ -243,7 +254,8 @@ class p_OLS_raw(object):
 
 class p_OLS(p_OLS_raw):
 	'''
-	Class for Ordinary Least Squares linear regression results on chosen variables of a pandas DataFrame.
+	Class for Ordinary Least Squares linear regression results on chosen 
+	variables of a pandas DataFrame.
 	
 	__author__ = 'Pedro Forquesato <pedro.forquesato@puc-rio.br>'
 	
@@ -252,31 +264,34 @@ class p_OLS(p_OLS_raw):
 	Arguments
 	---------
 	
-	dataFrame		: DataFrame
-					  The Pandas DataFrame to which y_variable and x_variable belongs.
-	yVariable		: str
-					  A string with the name of the variable (column) in df to be used as
-					  the dependent variable.
-	xVariable		: list
-					  List of strings with names of variables (columns) in df to be used as
-					  independent variables. Factors can be marked by adding 
-					  'factor:' in front of the variable. Interactions can be added using '*'
-					  between variable names.
-	intercept		: bool
-					  Whether to add an intercept to regression. Defaults to True.
-	seMethod		: str
-					  One of possible methods of calculating standard errors. Options are None, which
-					  uses standard simplified formula for SE, 'robust' for White-Huber
-					  heteroskedasticity-robust SE and 'bootstrap' for bootstrap-calculated SE.
-					  Defaults to 'robust', following discussion in Cameron & Triverdi (2005), p.74-75.
-	cluster			: str
-					  Name of the variable that defines the clusters, if those exist. Defaults to None.
-					  If a string is given, then Cluster-robust standard errors are calculated, and any value
-					  given to se_method is ignored, except if given 'bootstrap', when Bootstrap clustered SE
-					  are calculated instead (NOT WORKING ATM).  Designed for SMALL clusters, such that Variance 
-					  Matrix can be properly estimated.	
-	autoPrint		: bool
-					  Whether should automatically print the results. Defaults to True.
+	dataFrame	: DataFrame
+			  The Pandas DataFrame to which y_variable and x_variable 
+			  belongs.
+	yVariable	: str
+			  A string with the name of the variable (column) in df 
+			  to be used as the dependent variable.
+	xVariable	: list
+			  List of strings with names of variables (columns) in 
+			  dataFrame to be used as  independent variables. 
+			  Factors can be marked by adding 'factor:' in front of the 
+			  variable. Interactions can be added using '*' between variable names.
+	intercept	: bool
+			  Whether to add an intercept to regression. Defaults to True.
+	seMethod	: str
+			  One of possible methods of calculating standard errors. 
+			  Options are None, which uses standard simplified formula 
+			  for SE, 'robust' for White-Huber heteroskedasticity-robust SE 
+			  and 'bootstrap' for bootstrap-calculated SE. Defaults to 'robust',
+			  following discussion in Cameron & Triverdi (2005), p.74-75.
+	cluster		: str
+			  Name of the variable that defines the clusters, if those exist.
+			  Defaults to None. If a string is given, then Cluster-robust standard 
+			  errors are calculated, and any value given to se_method is ignored, 
+			  except if given 'bootstrap', when Bootstrap clustered SE are 
+			  calculated instead (NOT WORKING ATM).  Designed for -small- clusters,
+			  such that Variance Matrix can be properly estimated.	
+	autoPrint	: bool
+			  Whether should automatically print the results. Defaults to True.
 	'''
 	
 	def __init__(self, dataFrame, yVariable, xVariable, intercept=True, \
@@ -338,16 +353,19 @@ class p_OLS(p_OLS_raw):
 	
 	def outPrint(self, printOpt='table', output=None):
 		'''
-		Prints the OLS parameters and statistics to either terminal or file (available in latex).
+		Prints the OLS parameters and statistics to either terminal 
+		or file (available in latex).
 		
 		Arguments
 		---------			
-		printOpt			: str
-							  How should output be returned. Defaults to 'table', with 
-							  results printed as a table. Other option is 'latex' for latex formatting.
-		output				: str
-							  The name of the file where the output should be printed. Defaults to
-							  None, which means output is printed in console.
+		printOpt	: str
+				  How should output be returned. Defaults to 'table',
+				  with  results printed as a table. Other option is 
+				  'latex' for latex formatting.
+		output		: str
+				  The name of the file where the output should be 
+				  printed. Defaults to None, which means output is 
+				  printed in console.
 		'''		
 		# This function prints the OLS results in a table format.
 		
@@ -357,7 +375,8 @@ class p_OLS(p_OLS_raw):
 		headers = ['Variable', 'Coefficient', 'Std. Errors', 'T Value', 'P Value']
 		table = list()
 		for i, var in enumerate(self.xVariable):
-			table.append([var, self.beta[i, 0], self.stdError[i, 0], self.tValue[i, 0], self.pValue[i, 0]])
+			table.append([var, self.beta[i, 0], self.stdError[i, 0], \
+			        self.tValue[i, 0], self.pValue[i, 0]])
 		
 		# Prepare for printing the method we used to calculate std. errors.
 		if self.cluster is not None:
@@ -372,28 +391,34 @@ class p_OLS(p_OLS_raw):
 		elif self.seMethod is None or self.seMethod is 'None':
 			tpSE = 'Homoskedastic Restricted'
 		else:
-			raise ValueError('Variable se_method did not receive an acceptable value. Try "bootstrap", "robust" or None.')
+			raise ValueError('Variable se_method did not receive an '
+			        'acceptable value. Try "bootstrap", "robust" or None.')
 		
 		# Step 2:
 		# Above the table we print general statistics of the model (N, R^2, etc.)
-		info = [['Dep. Variable:', self.yVariable], ['Model:', 'OLS'], ['Standard Errors:', tpSE], \
-				['No. Observations:', str(self.N)], ['No. Variables:', str(self.K)],
-				['R Squared:', '%.3f' % self.rSquare], ['Adj. R Squared', '%.3f' % self.adjRSquare]]		
+		info = [['Dep. Variable:', self.yVariable], ['Model:', 'OLS'], 
+		        ['Standard Errors:', tpSE], \
+			['No. Observations:', str(self.N)], ['No. Variables:', str(self.K)],
+			['R Squared:', '%.3f' % self.rSquare], 
+			['Adj. R Squared', '%.3f' % self.adjRSquare]]		
 		
 		# Step 3: Print out the output.
 		if printOpt not in ['table', 'latex']:
 			# First we check for wrong printOpt input.	
-			raise ValueError('Variable printOpt was not given an acceptable string. Try: "table" or "latex".')
+			raise ValueError('Variable printOpt was not given an '
+			        'acceptable string. Try: "table" or "latex".')
 		else:
 			# Otherwise:
 			if output is None:
 				if printOpt is 'table':
 					print tabulate(info, floatfmt='.4f', tablefmt='rst')
-					print tabulate(table, headers=headers, floatfmt=".4f", tablefmt='rst')
+					print tabulate(table, headers=headers, \
+					        floatfmt=".4f", tablefmt='rst')
 			
 				elif printOpt is 'latex':
 					print tabulate(info, floatfmt='.4f', tablefmt='latex')
-					print tabulate(table, headers=headers, tablefmt="latex", floatfmt=".4f")
+					print tabulate(table, headers=headers, \
+					        tablefmt="latex", floatfmt=".4f")
 					
 			else:
 				# If output is not None, we print to a file. First we open it...
@@ -402,11 +427,13 @@ class p_OLS(p_OLS_raw):
 				# ... then we print...
 				if printOpt is 'table':
 					print >> f, tabulate(info, floatfmt='.4f', tablefmt='rst')
-					print >> f, tabulate(table, headers=headers, floatfmt=".4f", tablefmt='rst')
+					print >> f, tabulate(table, headers=headers, \
+					        floatfmt=".4f", tablefmt='rst')
 			
 				elif printOpt is 'latex':
 					print >> f, tabulate(info, floatfmt='.4f', tablefmt='latex')	
-					print >> f, tabulate(table, headers=headers, tablefmt="latex", floatfmt=".4f")
+					print >> f, tabulate(table, headers=headers, \
+					        tablefmt="latex", floatfmt=".4f")
 				
 				# ... then we close it.	
 				f.close()	
@@ -414,8 +441,9 @@ class p_OLS(p_OLS_raw):
 
 	def _p_Dummify(self, dataFrame, xVariable, yVariable, cluster):
 		'''
-		Prepares DataFrame and variable lists for transforming them into matrixes
-		used for OLS algebra. Most work involves transforming factor variables into dummies.
+		Prepares DataFrame and variable lists for transforming them into 
+		matrixes used for OLS algebra. Most work involves transforming 
+		factor variables into dummies.
 		'''
 		# Here we fix the DataFrame to be able to run OLS.
 		
@@ -424,7 +452,8 @@ class p_OLS(p_OLS_raw):
 		# pandas object. To do so, we simply put 'factor:' in front ourselves.
 		for varIndex, varName in enumerate(xVariable):
 			if varName in dataFrame.columns:
-				if dataFrame[varName].dtype == 'O' and not varName.startswith('factor:'):
+				if dataFrame[varName].dtype == 'O' and \
+				        not varName.startswith('factor:'):
 					x_variable[index] = 'factor:' + var_name
 		
 		'''
