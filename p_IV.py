@@ -1042,7 +1042,6 @@ class p_IV(p_IV_raw, p_IV_FS):
 if __name__ == '__main__':
     
     # Import testing modules
-    from scipy.stats import multivariate_normal
     from math import pi, e
     import p_OLS
     
@@ -1089,12 +1088,17 @@ if __name__ == '__main__':
     # Now we instrument for 'x1' with 'z1'.
     testReg3 = p_IV(dataFrameTest, 'y', ['x2'], ['x1'], ['z1'], autoPrint=False)
     
-    # We can add factors
+    # We can add factors...
     testReg4 = p_IV(dataFrameTest, 'y', ['x2', 'Series'], ['x1'], ['z1'],
         autoPrint=False)
     
-    # Finally, we instrument for both 'x1' and 'x2' with 'z1' and 'z2'.
+    # ... or instrument for both 'x1' and 'x2' with 'z1' and 'z2'.
     testReg5 = p_IV(dataFrameTest, 'y', [], ['x1', 'x2'], ['z1', 'z2'], 
+        autoPrint=False)
+        
+    # And we can also instrument for 'x1' with both 'z1' and 'z2'
+    # (overidentified model), using then 2SLS method.
+    testReg6 = p_IV(dataFrameTest, 'y', ['x2'], ['x1'], ['z1', 'z2'], 
         autoPrint=False)
     
     # That is all we have so far on IV. We plan to add bootstrap and
@@ -1107,5 +1111,5 @@ if __name__ == '__main__':
     # On this stage, we still need to give variables to print in their
     # final form.
     p_MultiOut.p_MultiOut([testReg1, testReg2, testReg3, 
-        testReg4, testReg5], ['Intercept', 'x1', 'x2', 
+        testReg4, testReg5, testReg6], ['Intercept', 'x1', 'x2', 
         'Series_ENT', 'Series_TNG', 'Series_TOS']) 
