@@ -11,7 +11,7 @@ def p_Bootstrap(W, repNumber=200, statistic='se', bCluster=None, method='nonpara
 	
 	...
 	
-		Arguments
+    Arguments
 	---------
 	
 	W		: np.array
@@ -33,13 +33,13 @@ def p_Bootstrap(W, repNumber=200, statistic='se', bCluster=None, method='nonpara
 			  Triverdi (2005), p.360-361.
 	'''
 	# List where the bootstrapped repetitions will be sent
-	boot_list = list()
+	bootList = list()
 	
 	# Sets up parameters
 	N = len(W[:, 0])
 	K = len(W[0, 1:])
 	
-	if b_cluster is not None:
+	if bCluster is not None:
 		# Transform factor into dummies
 		numberClusters = len(bCluster.columns)
 						
@@ -47,20 +47,20 @@ def p_Bootstrap(W, repNumber=200, statistic='se', bCluster=None, method='nonpara
 		if numberClusters == 1:
 			raise Exception('This factor has only one unique value!')
 	
-		n_sampling = N / number_clusters
-		#rep_number = 400
+		nSampling = N / numberClusters
+		#repNumber = 400
 		
-	for rep in xrange(rep_number):
+	for rep in xrange(repNumber):
 		# See Cameron & Triverdi (2005), p.360 for the bootstrap algorithm
 				
 		# Calculate the target statistic
 		if statistic is 'se' and method is 'nonparametric':
-			if b_cluster is None:
+			if bCluster is None:
 				# Gets indexes of a sample with replacement
-				sample_indx = [randint(0, N - 1) for i in xrange(N)]
+				sampleIndx = [randint(0, N - 1) for i in xrange(N)]
 		
 				# Get the sample database
-				smple = W[sample_indx, :]
+				smple = W[sampleIndx, :]
 				
 				# Define X and y for the sample
 				X_b = smple[:, 1:]
@@ -71,12 +71,12 @@ def p_Bootstrap(W, repNumber=200, statistic='se', bCluster=None, method='nonpara
 				if np.linalg.det(XX_b) != 0:
 					XX_b_inv = np.linalg.inv(XX_b)
 				else:
-					raise ValueError('Independent variables are colinear!')
+					raise ValueError("X'X (bootstrap) is singular!")
 				Xy_b = np.dot(X_b.T, y_b)
-				Beta_b = np.dot(XX_b_inv, Xy_b)
+				betaB = np.dot(XX_b_inv, Xy_b)
 				
 				# Add them to boot_list
-				boot_list.append(Beta_b)  
+				bootList.append(betaB)  
 			
 			else:
 				# With cluster, we sample with replacement each cluster and then
@@ -84,49 +84,49 @@ def p_Bootstrap(W, repNumber=200, statistic='se', bCluster=None, method='nonpara
 				# p.708 for an application to panel data estimation.
 				
 				# Sample from clusters
-				sample_indx = [randint(0, number_clusters - 1) for i in xrange(n_sampling)]
+				sampleIndx = [randint(0, numberClusters - 1) for i in xrange(nSampling)]
 				
 				# Get the sample data			
 				chosen = list()
-				for rndom in sample_indx:
-					chosen.append(W[np.array(clusters.iloc[:, rndom] == 1), :])
+				for rndom in sampleIndx:
+					chosen.append(W[np.array(bCluster.iloc[:, rndom] == 1), :])
 					
-				chosen_W = np.concatenate(chosen)
+				chosenW = np.concatenate(chosen)
 				
 				# And now it is just as before
 				# Define X and y for the sample
-				X_b = chosen_W[:, 1:]
-				y_b = chosen_W[:, 0]
+				X_b = chosenW[:, 1:]
+				y_b = chosenW[:, 0]
 				
 				# Calculate the OLS parameters
 				XX_b = np.dot(X_b.T, X_b)
 				if np.linalg.det(XX_b) != 0:
 					XX_b_inv = np.linalg.inv(XX_b)
 				else:
-					raise ValueError('Independent variables are colinear!')
+					raise ValueError("X'X (bootstrap) is singular!")
 				Xy_b = np.dot(X_b.T, y_b)
-				Beta_b = np.dot(XX_b_inv, Xy_b)
+				betaB = np.dot(XX_b_inv, Xy_b)
 				
 				# Add them to boot_list
-				boot_list.append(Beta_b)  	
+				bootList.append(betaB)  	
 							
 		else:
 			raise NotImplementedError('Sorry!')
 	
-	if statistic == 'se':
+	if statistic is 'se':
 		# See Cameron & Triverdi (2005), p. 362 for details
-		Theta_hat = np.sum(boot_list, axis=0) / float(rep_number)
+		thetaHat = np.sum(bootList, axis=0) / float(repNumber)
 		
-		for i in xrange(rep_number):
-			boot_list[i].shape = (K, 1)
-			Theta_hat.shape = (K, 1)
-			boot_diff = boot_list[i] - Theta_hat
-			boot_list[i] = np.dot(boot_diff, boot_diff.T)
+		for i in xrange(repNumber):
+			bootList[i].shape = (K, 1)
+			thetaHat.shape = (K, 1)
+			bootDiff = bootList[i] - thetaHat
+			bootList[i] = np.dot(bootDiff, bootDiff.T)
 		
-		VarCoVar = np.sum(boot_list, axis=0) / float(rep_number - 1)
+		varCoVar = np.sum(bootList, axis=0) / float(repNumber - 1)
 	
 	# Returns result
-	return VarCoVar
+	return varCoVar
 	
 	# This is the end.
 
