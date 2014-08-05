@@ -117,7 +117,7 @@ class p_IV_FS(object):
         X2 = self.dataFrame.loc[:, self.xVariable].as_matrix()
         X2.shape = (self.N, len(self.xVariable))
         Z = self.dataFrame.loc[:, self.zVariable].as_matrix()
-        Z.shape = (self.N, self.K_z)
+        Z.shape = (self.N, self.Kz)
         x1 = self.dataFrame.loc[:, self.endogenous].as_matrix()
         x1.shape = (self.N, 1)
         
@@ -142,7 +142,7 @@ class p_IV_FS(object):
             zTilde = np.concatenate(zTilde, axis=1)
         
         # Finally, we obtain what we sought: a regression of xTilde on zTilde.
-        tildeOLS = p_OLS.p_OLS_raw(xTilde, zTilde, self.SE_method, self.Cluster)
+        tildeOLS = p_OLS.p_OLS_raw(xTilde, zTilde, self.seMethod, self.cluster)
         
         # And its R Square is the Partial R Square we were looking for.
         # (see p_IV_raw implementation for details).
@@ -1040,5 +1040,72 @@ class p_IV(p_IV_raw, p_IV_FS):
                 f.close()    
 
 if __name__ == '__main__':
-    pass
-    # Put a test data here. 
+    
+    # Import testing modules
+    from scipy.stats import multivariate_normal
+    from math import pi, e
+    import p_OLS
+    
+    # Set seed
+    np.random.seed(87655678)
+        
+    # Creates a normal distributed and a uniform distributed Z variables
+    var2List = np.random.normal(50, 20, 16)
+    var3List = np.random.uniform(-10, 0, 16)
+    
+    # Now we create two variables that depend on this ones
+    errEndog1 = np.random.normal(0, 20, 16)
+    errEndog2 = np.random.normal(0, 20, 16)
+    endog1List = var2List * 0.7 + errEndog1
+    endog2List = var3List * (-2) + errEndog2
+    
+    # And finally we need an omitted variable.
+    ommit1List = np.repeat(10, 16) + errEndog1 * pi**2 + errEndog2 * e**2
+    
+    # Now we create a random y variable with random and clustered errors
+    # such that alpha = 20, beta1 = pi (3.14) and beta2 = e (2.71).
+    var1List = np.random.normal(20, 3, 16) + 0.2 * ommit1List + \
+        pi * endog1List + e * endog2List
+    
+    # And then we build a pandas DataFrame with the 16 observations.
+    dataFrameTest = pd.DataFrame({'ID': ['Kirk', 'Spock', 'McCoy', \
+        'Uhura', 'Picard', 'Riker', 'Data', 'Worf', 'Sisko', 'Kira', \
+        'Dax', 'Bashir', 'Archer', 'TPol', 'Hoshi', 'Phlox'], \
+        'Series': ['TOS', 'TOS', 'TOS', 'TOS', \
+        'TNG', 'TNG', 'TNG', 'TNG', 'DS9', 'DS9', \
+        'DS9', 'DS9', 'ENT', 'ENT', 'ENT', 'ENT'],\
+        'y': var1List, 'x1': endog1List, 'x2': endog2List,
+        'z1': var2List, 'z2': var3List})
+    
+    # We first show the OLS results
+    testReg1 = p_OLS.p_OLS(dataFrameTest, 'y', ['x1', 'x2'], autoPrint=False)
+    
+    # Now we try instrumenting for 'x1', with 'z2'.
+    testReg2 = p_IV(dataFrameTest, 'y', ['x2'], ['x1'], ['z2'], 
+        seMethod=None, autoPrint=False)
+    # Since population corr(x1, z2) = 0, the model goes haywire.
+    # (Is it because of that?)
+    
+    # Now we instrument for 'x1' with 'z1'.
+    testReg3 = p_IV(dataFrameTest, 'y', ['x2'], ['x1'], ['z1'], autoPrint=False)
+    
+    # We can add factors
+    testReg4 = p_IV(dataFrameTest, 'y', ['x2', 'Series'], ['x1'], ['z1'],
+        autoPrint=False)
+    
+    # Finally, we instrument for both 'x1' and 'x2' with 'z1' and 'z2'.
+    testReg5 = p_IV(dataFrameTest, 'y', [], ['x1', 'x2'], ['z1', 'z2'], 
+        autoPrint=False)
+    
+    # That is all we have so far on IV. We plan to add bootstrap and
+    # clustered SE soon.
+  
+    # We can compare the OLS and IV using p_MultiOut to print 
+    # all to a single table with formating. 
+    import p_MultiOut
+    
+    # On this stage, we still need to give variables to print in their
+    # final form.
+    p_MultiOut.p_MultiOut([testReg1, testReg2, testReg3, 
+        testReg4, testReg5], ['Intercept', 'x1', 'x2', 
+        'Series_ENT', 'Series_TNG', 'Series_TOS']) 

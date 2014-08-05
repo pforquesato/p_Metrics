@@ -616,7 +616,7 @@ if __name__ == '__main__':
 
     # ... add interactions...
     testReg4 = p_OLS(dataFrameTest, 'y', ['x2', 'x3', 'x2 * x3'], 
-        intercept=False, autoPrint=False)
+        autoPrint=False)
         
     # ... assume homoskedasticity...
     testReg5 = p_OLS(dataFrameTest, 'y', ['x2', 'x3'], 
@@ -638,10 +638,10 @@ if __name__ == '__main__':
         
     # And finally we can use p_MultiOut to print all to a single
     # table with formating
-    import p_multiOut
+    import p_MultiOut
     
     # On this stage, we still need to give variables to print in their
     # final form.
-    p_multiOut.p_multiOut(['testReg' + str(i) for i in range(1, 9)], 
-        ['Intercept', 'x2', 'x3', 'Series_ENT', 
-        'Series_TNG', 'Series_TOS'])
+    p_MultiOut.p_MultiOut([testReg1, testReg2, testReg3, testReg4, testReg5, 
+        testReg6, testReg7, testReg8], ['Intercept', 'x2', 'x3', 'x2 * x3',
+        'Series_ENT', 'Series_TNG', 'Series_TOS'])
