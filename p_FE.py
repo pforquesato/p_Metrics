@@ -120,7 +120,7 @@ class p_FE(p_OLS.p_OLS):
             # undo the indexing. We do so below (and for each effect).
             self.dataFrame.reset_index(inplace=True)
         
-        elif self.effect is 'first differences':
+        elif self.effect is 'diff':
             # The First Differences effect consists in taking discrete
             # differences of variables on time, for each individual.
             # This is equivalent to differentiating all and removing first
@@ -141,7 +141,7 @@ class p_FE(p_OLS.p_OLS):
             
         else:
             raise ValueError('Variable effect was not given a valid value.' 
-                'Try "within", "first differences" or "random".')
+                'Try "ols", "within", "diff" or "random".')
 
         # Now we obtain No. observations, periods and variables.
         # We must be careful not to override p_OLS variables.
@@ -326,5 +326,76 @@ class p_FE(p_OLS.p_OLS):
 
 
 if __name__ == '__main__':
-    pass
-    # Add some test data here.
+
+    # Import testing modules
+    from scipy.stats import multivariate_normal
+    from math import pi, e
+    
+    # Set seed
+    np.random.seed(87655678)
+    
+    # Create individually-clustered errors
+    errorClustered = np.concatenate([multivariate_normal.rvs(mean=[0, 0, 0, 0], \
+        cov=0.4) * 30 for i in range(4)])
+        
+    # Now correlate these clusters with the x variables.    
+    # Creates a normal distributed and a uniform distributed X variables
+    var2List = np.random.normal(50, 20, 16) + 2 * errorClustered
+    var3List = np.random.uniform(-10, 0, 16) + (-1) * errorClustered
+    
+    # Now we create a random y variable with random and clustered errors
+    # such that alpha = 20, beta1 = pi (3.14) and beta2 = e (2.71).
+    var1List = np.random.normal(20, 3, 16) + errorClustered + \
+        pi * var2List + e * var3List
+    
+    # And then we build a pandas DataFrame with the 16 observations.
+    dataFrameTest = pd.DataFrame({'ID': ['Captain', 'Captain', 'Captain', \
+        'Captain', 'Science Officer', 'Science Officer', 'Science Officer', 'Science Officer', \
+        'Engineer', 'Engineer', 'Engineer', 'Engineer', \
+        'Security Officer', 'Security Officer', 'Security Officer', 'Security Officer'], \
+        'Year': [2264, 2364, 2369, 2150, \
+        2264, 2364, 2369, 2150, 2264, 2364, \
+        2369, 2150, 2264, 2364, 2369, 2150],\
+        'y': var1List, 'x2': var2List, 'x3': var3List})
+             
+    # First we run OLS
+    testReg1 = p_OLS.p_OLS(dataFrameTest, 'y', ['x2', 'x3'], autoPrint=False)
+    
+    # Now running FE 'ols' method, we panel-adjust the standard errors.
+    testReg2 = p_FE(dataFrameTest, 'y', ['x2', 'x3'], indexes=['ID', 'Year'],
+        effect='ols', autoPrint=False)
+    
+    # But the OLS regression is still not consistent, as the 
+    # individual hidden fixed effect is correlated with the variables.
+    # So we do within FE estimation...
+    testReg3 = p_FE(dataFrameTest, 'y', ['x2', 'x3'],  indexes=['ID', 'Year'],
+        autoPrint=False)
+
+    # ... or first differences estimation.
+    testReg4 = p_FE(dataFrameTest, 'y', ['x2', 'x3'],  indexes=['ID', 'Year'],
+        effect='diff', autoPrint=False)
+        
+    # The Default SE method is Heteroskedasticity-robust, 
+    # but we can also use bootstrap for within...
+    testReg5 = p_FE(dataFrameTest, 'y', ['x2', 'x3'],  indexes=['ID', 'Year'],
+        seMethod='bootstrap', autoPrint=False)
+    
+    # ... pooled ols...
+    testReg6 = p_FE(dataFrameTest, 'y', ['x2', 'x3'],  indexes=['ID', 'Year'],
+        seMethod='bootstrap', effect='ols', autoPrint=False)
+    
+    # ... or first differences.
+    testReg7 = p_FE(dataFrameTest, 'y', ['x2', 'x3'],  indexes=['ID', 'Year'],
+        seMethod='bootstrap', effect='diff', autoPrint=False)
+    
+    # Instrumental variables panel data methods are not implemented yet,
+    # even though it shouldn't be that difficult to do so.
+        
+    # And finally we can use p_MultiOut to print all to a single
+    # table with formating
+    import p_MultiOut
+    
+    # On this stage, we still need to give variables to print in their
+    # final form.
+    p_MultiOut.p_MultiOut([testReg1, testReg2, testReg3, testReg4, testReg5, 
+        testReg6, testReg7], ['Intercept', 'x2', 'x3'])
