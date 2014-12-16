@@ -1,5 +1,7 @@
-p_Metrics
+pMetrics
 ========
+
+pMetrics follows GNU GENERAL PUBLIC LICENSE. See LICENSE for more details.
 
 Python implementation of basic econometric models. Currently offers ordinary least squares (OLS), instrumental variables (IV) and panel models, with heteroskedasticity-robust variance matrixes (as default), as well as the possibility of bootstrapped and/or cluster-robust standard errors (and in particular, panel robust SE).
 
